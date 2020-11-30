@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virginia Evacuation Zones Map</title>
+    
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.3.1/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.3.1/mapbox-gl.css' rel='stylesheet' />    
+    
+    <style>
+        body{
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            position: absolute;
+            width: 100%;
+            top: 0;
+            Bottom: 0;
+        }
+        #search-box{
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 1;
+        }
+        #Zone-Filter{
+            font-size: 22px;
+            padding: 10px;
+            border-color: gray;
+            border-width: 1px;
+            border-radius: 5px;
+            box-shadow: 3px 3px 3px 1px rgba(150,150,150,0);
+        }
+
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <div id="search-box">
+        <input type="text" id="Zone-Filter" placeholder="Search for your zone">
+    </div>
+
+</body>
+<script>
+    //Map Load
+	mapboxgl.accessToken = 'pk.eyJ1IjoibWJyaXQwMTgiLCJhIjoiY2tncnl5bzV5MDVjNTJydGJ3YmlpbjM4OSJ9.b8gFRXiKZYqr8epW8YJ4Iw';
+    var map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mbrit018/ckgvavzh54p6419qt54805g89',
+    center: [-76.4, 37],
+    zoom: 9
+    });
+
+    map.on('load',function(){
+        map.addSource('zone-source',{
+            'type': 'vector',
+            'url': 'mapbox://mbrit018.02putvfi'
+        });
+        
+        map.addLayer({
+            'id': 'zone-pois',
+            'source': 'zone-source',
+            'source-layer': 'VA_Huricane_Evac_zones-7s1nql',
+            'type': 'circle',
+            'paint' : {
+                'circle-color' :'#3286B2',
+                'circle-stroke-color': '#D7D7D7',
+                'circle-stroke-width': 1
+            }
+
+        })
+    })
+
+    //Filter
+    document.querySelector('#Zone-Filter').addEventListener('keyup',function(e){
+        if(e.which == 13) {
+            let searchTerm = document.querySelector('#Zone-Filter').value;
+            map.setFilter('zone-pois',['==','Zone',searchTerm])
+        }
+    });
+
+
+    var popup = new mapboxgl.popup()
+
+        map.on('click','zone-pois',function(e){
+            let coordinates = e.Lat_Lng;
+            let ZoneName = e.features[0].properties.Zone;
+            popup
+                .setLngLat(coordinates)
+                .SetHTML(ZoneName)
+                .addTo(map)
+
+        });
+</script>
+
+</html>
